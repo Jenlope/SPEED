@@ -1,0 +1,240 @@
+package com.example.speed
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.speed.ui.theme.SPEEDTheme
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            SPEEDTheme {
+                SPEEDApp()
+            }
+        }
+    }
+}
+
+@PreviewScreenSizes
+@Composable
+fun SPEEDApp() {
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.WELCOME) }
+
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            AppDestinations.entries.forEach {
+                item(
+                    icon = {
+                        Icon(
+                            it.icon,
+                            contentDescription = it.label
+                        )
+                    },
+                    label = { Text(it.label) },
+                    selected = it == currentDestination,
+                    onClick = { currentDestination = it }
+                )
+            }
+        }
+    ) {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
+            when (currentDestination) {
+                AppDestinations.WELCOME ->
+                    WelcomeScreen(Modifier.padding(innerPadding))
+
+                AppDestinations.CREATE ->
+                    CreateScreen(Modifier.padding(innerPadding))
+
+                AppDestinations.RUN ->
+                    RunScreen(Modifier.padding(innerPadding))
+
+                AppDestinations.HISTORY ->
+                    HistoryScreen(Modifier.padding(innerPadding))
+            }
+        }
+    }
+}
+
+enum class AppDestinations(
+    val label: String,
+    val icon: ImageVector,
+) {
+    WELCOME("Welcome", Icons.Default.Home),
+    CREATE("Create", Icons.Default.Favorite),
+    RUN("Run", Icons.Default.AccountBox),
+    HISTORY("History", Icons.Default.AccountBox),
+}
+
+@Composable
+fun WelcomeScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "Welcome to SPEED",
+        modifier = modifier
+    )
+}
+
+@Composable
+fun CreateScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "Create Route Screen",
+        modifier = modifier
+    )
+}
+
+@Composable
+fun RunScreen(
+    modifier: Modifier = Modifier
+) {
+
+    var time by remember { mutableStateOf(0) }
+    var distance by remember { mutableStateOf(0f) }
+    var isRunning by remember { mutableStateOf(false) }
+
+    // Timer logic
+    LaunchedEffect(isRunning) {
+        while (isRunning) {
+            kotlinx.coroutines.delay(1000)
+            time += 1
+            distance += 0.05f
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+
+        // Top Title Bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(Color.Black),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = "Run Route",
+                color = Color.White,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = "Map",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            StatBox("TIME: ${time}s")
+            StatBox("DISTANCE: %.2f km".format(distance))
+            StatBox("PACE")
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .border(1.dp, Color.Gray),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (isRunning) "PAUSE" else "START",
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .clickable {
+                        isRunning = !isRunning
+                    }
+            )
+
+            Text(
+                text = "END",
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .clickable {
+                        isRunning = false
+                        time = 0
+                        distance = 0f
+                    }
+            )
+        }
+    }
+}
+
+@Composable
+fun StatBox(label: String) {
+    Column(
+        modifier = Modifier
+            .width(100.dp)
+            .height(150.dp)
+            .border(1.dp, Color.Gray),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .border(1.dp, Color.Gray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(label)
+        }
+    }
+}
+
+@Composable
+fun HistoryScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "History Screen",
+        modifier = modifier
+    )
+}
