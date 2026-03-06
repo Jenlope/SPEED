@@ -1,7 +1,17 @@
+import java.util.Properties
+import org.gradle.internal.impldep.junit.runner.Version.id
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+
+val apikeyProperties = Properties()
+val apikeyPropertiesFile = rootProject.file("apikeys.properties")
+
+if (apikeyPropertiesFile.exists()) {
+    apikeyProperties.load(apikeyPropertiesFile.inputStream())
 }
 
 android {
@@ -9,6 +19,11 @@ android {
     compileSdk {
         version = release(36)
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
 
     defaultConfig {
         applicationId = "com.example.speed"
@@ -18,7 +33,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        defaultConfig {
+            buildConfigField(
+                "String",
+                "SPEEDAPP_APIKEY",
+                "\"${project.findProperty("SPEEDAPP_APIKEY")}\""
+            )
+            manifestPlaceholders["SPEEDAPP_APIKEY"] =
+                apikeyProperties["SPEEDAPP_APIKEY"] ?: ""
+        }
     }
+
+
 
     buildTypes {
         release {
@@ -39,6 +66,7 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
 dependencies {
@@ -58,4 +86,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
 }
