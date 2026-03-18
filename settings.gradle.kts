@@ -1,3 +1,11 @@
+import java.util.Properties
+import java.io.FileInputStream
+val mapboxProperties = Properties()
+val mapboxPropertiesFile = File(rootDir, "mapbox.properties")
+
+if (mapboxPropertiesFile.exists()) {
+    mapboxProperties.load(FileInputStream(mapboxPropertiesFile))
+}
 pluginManagement {
     repositories {
         google {
@@ -16,6 +24,18 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+            credentials {
+                username = "mapbox"
+
+                password = mapboxProperties.getProperty("MAPBOX_DOWNLOADS_TOKEN")
+            }
+            authentication{
+                create<BasicAuthentication>("basic")
+            }
+        }
     }
 }
 

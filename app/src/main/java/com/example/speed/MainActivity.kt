@@ -45,15 +45,36 @@ import android.widget.CalendarView
 //import androidx.compose.ui.Alignment
 //import androidx.compose.ui.Alignment
 import java.util.Calendar
+import com.mapbox.maps.MapView
+import com.mapbox.maps.Style
+import com.example.speed.ui.screens.CreateScreen
+import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (!MapboxNavigationApp.isSetup()) {
+            MapboxNavigationApp.setup {
+                NavigationOptions.Builder(applicationContext)
+                    //.accessToken(getString(R.string.mapbox_access_token))
+                    .build()
+            }
+        }
+
+        MapboxNavigationApp.attach(this)
         setContent {
             SPEEDTheme {
                 SPEEDApp()
             }
+        }
+
+        fun onDestroy() {
+            super.onDestroy()
+            MapboxNavigationApp.detach(this)
         }
     }
 }
@@ -115,139 +136,6 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
         text = "Welcome to SPEED",
         modifier = modifier
     )
-}
-
-@Composable
-fun CreateScreen(
-    modifier: Modifier = Modifier
-) {
-    var distanceInput by remember { mutableStateOf("") }
-    var distance by remember { mutableStateOf("") }
-    var estimatedTime by remember { mutableStateOf("") }
-    var elevationGain by remember { mutableStateOf("") }
-
-    /*
-    Text(
-        text = "Create Route Screen",
-        modifier = modifier
-    )
-    */
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Top Title Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(Color.Black),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                text = "Create Route",
-                color = Color.White,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-
-
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        //Distance input
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            //horizontalArrangement = Arrangement.SpaceBetween
-
-        ) {
-            //CreateRouteBox("Distance Input")
-            DistanceInputBox(
-                label = "Distance input",
-                value = distanceInput,
-                onValueChange = {distanceInput = it}
-            )
-
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        //Map
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            //horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            MapBox("Map goes here")
-
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        //Route details
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            //horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            RouteDetailsBox(
-                distance = distance,
-                estimatedTime = estimatedTime,
-                elevationGain = elevationGain
-            )
-
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        //Bottom selection bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .border(1.dp, Color.Gray),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "RELOAD",
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .clickable {
-
-                    }
-            )
-
-            Text(
-                text = "SAVE",
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clickable {
-
-                    }
-            )
-
-            Text(
-                text = "HISTORY",
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clickable {
-
-                    }
-            )
-
-            Text(
-                text = "START",
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clickable {
-
-                    }
-            )
-        }
-
-
-    }
 }
 
 @Composable
@@ -396,119 +284,6 @@ fun TimeBox(
             .padding(start = 16.dp))
     }
 }
-
-@Composable
-fun DistanceInputBox(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit
-){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .border(1.dp, Color.Gray),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .border(1.dp, Color.Gray),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                label, modifier = Modifier
-                    .padding(start = 16.dp)
-            )
-
-        }
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-
-@Composable
-fun RouteDetailsBox(
-    distance: String,
-    estimatedTime: String,
-    elevationGain: String
-){
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp)
-            .border(1.dp, Color.Gray),
-        horizontalAlignment = Alignment.Start
-
-    ) {
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .border(1.dp, Color.Gray),
-            contentAlignment = Alignment.CenterStart,
-
-        ) {
-            Text(
-                "Route Details", modifier = Modifier
-                    .padding(start = 16.dp)
-            )
-
-        }
-
-        Spacer(modifier = Modifier.size(20.dp))
-
-        Text("Distance: $distance", modifier = Modifier
-            .padding(start = 16.dp))
-        Text("Estimated Time: $estimatedTime", modifier = Modifier
-            .padding(start = 16.dp))
-        Text("Elevation Gain: $elevationGain", modifier = Modifier
-            .padding(start = 16.dp))
-    }
-}
-
-@Composable
-fun MapBox(label: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
-            .border(1.dp, Color.Gray),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Text(
-            label, modifier = Modifier
-                .padding(start = 16.dp)
-        )
-
-        /*
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .border(1.dp, Color.Gray),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(label, modifier = Modifier
-                .padding(start = 16.dp)
-            )
-        }
-
-         */
-    }
-}
-
 
 @Composable
 fun HistoryScreen(modifier: Modifier = Modifier) {

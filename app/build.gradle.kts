@@ -1,18 +1,20 @@
-import java.util.Properties
-import org.gradle.internal.impldep.junit.runner.Version.id
+//import java.util.Properties
+//import org.gradle.internal.impldep.junit.runner.Version.id
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
-
+/*
 val apikeyProperties = Properties()
 val apikeyPropertiesFile = rootProject.file("apikeys.properties")
 
 if (apikeyPropertiesFile.exists()) {
     apikeyProperties.load(apikeyPropertiesFile.inputStream())
 }
+
+ */
 
 android {
     namespace = "com.example.speed"
@@ -35,6 +37,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         defaultConfig {
+            /*
             buildConfigField(
                 "String",
                 "SPEEDAPP_APIKEY",
@@ -42,6 +45,8 @@ android {
             )
             manifestPlaceholders["SPEEDAPP_APIKEY"] =
                 apikeyProperties["SPEEDAPP_APIKEY"] ?: ""
+
+             */
         }
     }
 
@@ -86,5 +91,11 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    //implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.mapbox.maps:android:11.0.0")
+    implementation("com.mapbox.navigationcore:android:3.20.0")
+    implementation("com.mapbox.navigationcore:ui-maps:3.20.0")
+
+    //implementation("com.mapbox.navigationcore:android-ndk27:3.20.0")
+    //implementation("com.mapbox.navigationcore:ui-maps-ndk27:3.20.0")
 }
